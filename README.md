@@ -54,6 +54,18 @@ public WSO2 Maven repository declared in the `pom.xml`.
 - A missing or empty properties file means no client is affected.
 - The properties file is re-read when it changes, so clients can be added or removed without a restart.
 - Only `cn=` fragments are kept; `ou=` and `dc=` parts of the DN are dropped.
-- Group names that themselves contain a comma are not supported, because the claim is split on commas.
+- The claim is split on commas that are not escaped with a backslash (RFC 4514), so a group name containing an escaped
+  comma (`cn=a\,b`) stays a single group (`a,b`) rather than being split into extra groups.
 - For JWT access tokens, `JWTTokenIssuer` builds the token from the `JWTClaimsSet.Builder` passed to the handler and
   ignores the claim set the handler returns. The handler therefore updates the builder as well as the returned set.
+
+## Security considerations
+
+- **Group names are no longer unique.** Only the `cn=` value is kept, so the `ou=`/`dc=` parts of the DN are lost. Two
+  groups with the same name in different OUs or directories become indistinguishable. Do not use the reduced claim for
+  authorization decisions unless group names are unique across your user stores.
+- **Group names are trusted input.** The claim value is parsed as an LDAP DN string. If untrusted users can create or
+  rename groups, make sure the directory escapes special characters (such as commas) in group names, and treat the
+  reduced claim accordingly.
+- The handler is applied only to the client IDs you list, which limits the impact to applications that expect
+  group-name-only values.

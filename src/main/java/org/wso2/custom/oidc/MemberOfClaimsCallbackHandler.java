@@ -135,7 +135,7 @@ public class MemberOfClaimsCallbackHandler extends DefaultOIDCClaimsCallbackHand
             if (!hasDnFragments) {
                 names.add(fragment);
             } else if (fragment.toLowerCase(Locale.ROOT).startsWith(CN_PREFIX)) {
-                names.add(fragment.substring(CN_PREFIX.length()));
+                names.add(unescape(fragment.substring(CN_PREFIX.length())));
             }
         }
         return names;
@@ -152,12 +152,43 @@ public class MemberOfClaimsCallbackHandler extends DefaultOIDCClaimsCallbackHand
                 collect(item, fragments);
             }
         } else if (value != null) {
-            for (String part : value.toString().split(MULTI_VALUE_SEPARATOR)) {
+            for (String part : splitOnUnescapedCommas(value.toString())) {
                 String trimmed = part.trim();
                 if (!trimmed.isEmpty()) {
                     fragments.add(trimmed);
                 }
             }
         }
+    }
+
+    /** Splits on commas that are not escaped with a backslash (RFC 4514), keeping the escapes in the parts. */
+    private static List<String> splitOnUnescapedCommas(String value) {
+
+        List<String> parts = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c == '\\' && i + 1 < value.length()) {
+                current.append(c).append(value.charAt(++i));
+            } else if (c == ',') {
+                parts.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        parts.add(current.toString());
+        return parts;
+    }
+
+    /** Removes the backslash from escaped characters, e.g. {@code a\,b} becomes {@code a,b}. */
+    private static String unescape(String value) {
+
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            out.append(c == '\\' && i + 1 < value.length() ? value.charAt(++i) : c);
+        }
+        return out.toString();
     }
 }
