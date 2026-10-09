@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.wso2.custom.oidc</groupId>
+    <artifactId>custom-oidc-claim-handler</artifactId>
+    <version>1.0.0</version>
+    <packaging>bundle</packaging>
+    <name>Custom OIDC Claims Callback Handler</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- The IS 5.11.0 runtime is Java 8; compile for it explicitly -->
+        <maven.compiler.release>8</maven.compiler.release>
+        <identity.oauth.version>6.4.111</identity.oauth.version>
+        <nimbus.version>7.3.0.wso2v1</nimbus.version>
+        <identity.framework.version>5.18.187</identity.framework.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>wso2-public</id>
+            <url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+            <version>${identity.oauth.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.base</artifactId>
+            <version>${identity.framework.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>${nimbus.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>5.1.9</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Export-Package>org.wso2.custom.oidc.*;version="${project.version}"</Export-Package>
+                        <Import-Package>
+                            com.nimbusds.jwt; version="[7.3,8)",
+                            org.wso2.carbon.identity.oauth2; version="[6.4,7)",
+                            org.wso2.carbon.identity.oauth2.authz; version="[6.4,7)",
+                            org.wso2.carbon.identity.oauth2.dto; version="[6.4,7)",
+                            org.wso2.carbon.identity.oauth2.token; version="[6.4,7)",
+                            org.wso2.carbon.identity.openidconnect; version="[6.4,7)",
+                            *;resolution:=optional
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
